@@ -8,7 +8,6 @@ void setup() {
    
   size(640, 480);  
    
-  //println( Serial.list() );  
   myPort = new Serial( this, Serial.list()[1], 9600);  
   myPort.clear();  
    
@@ -23,8 +22,6 @@ void draw() {
     output.write(myPort.read());  
    }  
    println(".");
-   //output.flush(); // Writes the remaining data to the file  
-   //output.close(); // Finishes the file  
   }   
   catch (IOException e) {  
    e.printStackTrace();  
