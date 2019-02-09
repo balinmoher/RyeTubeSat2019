@@ -75,7 +75,7 @@ Adafruit_VC0706 cam = Adafruit_VC0706(&cameraconnection);
 void snapshot() {
   
   Serial.begin(9600);
-  //Serial.println("VC0706 Camera snapshot test");
+  Serial.println("VC0706 Camera snapshot test");
   
   // see if the card is present and can be initialized:
   if (!SD.begin(chipSelect)) {
@@ -115,14 +115,14 @@ void snapshot() {
 //  if (imgsize == VC0706_320x240) Serial.println("320x240");
 //  if (imgsize == VC0706_160x120) Serial.println("160x120");
 
-  //Serial.println("Snap in 1 secs...");
+  Serial.println("Snap in 1 secs...");
   delay(1000);
   wdt_reset();
   
   if (! cam.takePicture()) {
-    //Serial.println("Failed to snap!");
+    Serial.println("Failed to snap!");
   }else{ 
-    //Serial.println("Picture taken!");
+    Serial.println("Picture taken!");
   }
   // Create an image with the name IMAGExx.JPG
   char filename[13];
@@ -158,7 +158,7 @@ void snapshot() {
     
     if(++wCount >= 64) { // Every 2K, give a little feedback so it doesn't appear locked up
       wdt_reset();
-      //Serial.print(".");
+      Serial.println(".");
       wCount = 0;
     }
     //Serial.print("Read ");  Serial.print(bytesToRead, DEC); Serial.println(" bytes");
@@ -184,23 +184,39 @@ void readSD(String filename) {
   
   // Open the file for reading
   File imgFile = SD.open(filename);
-
+  
+    
   // Check if file opened
   if (imgFile) {
-    //Serial.println("Reading now.");
+    
+    unsigned long fileSize = imgFile.size();
+    delay(100);
+    Serial.println("Reading");
+    Serial.println(fileSize);
+    delay(20);
+    
+    
     //Read and print file to serial
      while (imgFile.position() < imgFile.size()) {
         wdt_reset();
-        Serial.write(imgFile.read()); 
+        uint8_t mybuffer[32];
+        uint8_t bytesToRead = min(32, fileSize);
+    
+        //Serial.write(imgFile.read()); 
+        imgFile.read(mybuffer, bytesToRead); //read to buffer
+        Serial.write(mybuffer, bytesToRead); //write to serial
+        
+        fileSize -= bytesToRead; //update byte count
     }
   } else { 
     Serial.println("Error: could not open file.");
     return;
   }
 
+  Serial.flush(); //send remaining data before continuing
+  
   //Notify user
-  //Serial.println("");
-  //Serial.println("Finished");
+  Serial.println("Finished writing.");
   
   // Close file before exit
   imgFile.close();
